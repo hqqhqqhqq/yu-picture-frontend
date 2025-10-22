@@ -51,6 +51,14 @@
           <div>宽高比：{{ record.picScale }}</div>
           <div>大小：{{ (record.picSize / 1024).toFixed(2) }}KB</div>
         </template>
+        <template v-if="column.dataIndex === 'reviewMessage'">
+          <div>审核状态：{{ PIC_REVIEW_STATUS_MAP[record.reviewStatus] }}</div>
+          <div>审核信息：{{ record.reviewMessage }}</div>
+          <div>审核人：{{ record.reviewerId }}</div>
+          <div v-if="record.reviewTime">
+            {{ dayjs(record.reviewTime).format('YYYY-MM-DD HH:mm:ss') }}
+          </div>
+        </template>
         <template v-if="column.dataIndex === 'createTime'">
           {{ dayjs(record.createTime).format('YYYY-MM-DD HH:mm:ss') }}
         </template>
@@ -58,7 +66,22 @@
           {{ dayjs(record.editTime).format('YYYY-MM-DD HH:mm:ss') }}
         </template>
         <template v-else-if="column.key === 'action'">
-          <a-space>
+          <a-space wrap>
+            <a-button
+              v-if="record.reviewStatus !== PIC_REVIEW_STATUS_ENUM.PASS"
+              type="link"
+              @click="handleReview(record, PIC_REVIEW_STATUS_ENUM.PASS)"
+            >
+              通过
+            </a-button>
+            <a-button
+              v-if="record.reviewStatus !== PIC_REVIEW_STATUS_ENUM.REJECT"
+              danger
+              type="link"
+              @click="handleReview(record, PIC_REVIEW_STATUS_ENUM.REJECT)"
+            >
+              拒绝
+            </a-button>
             <a-button :href="`/add_picture?id=${record.id}`" target="_blank" type="link">
               编辑
             </a-button>
@@ -74,6 +97,7 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { deletePictureUsingPost, listPictureByPageUsingPost } from '@/api/pictureController.ts'
 import { message } from 'ant-design-vue'
 import dayjs from 'dayjs'
+import { PIC_REVIEW_STATUS_ENUM, PIC_REVIEW_STATUS_MAP } from '../../constants/picture.ts'
 
 const columns = [
   {
@@ -110,6 +134,10 @@ const columns = [
     title: '用户 id',
     dataIndex: 'userId',
     width: 80,
+  },
+  {
+    title: '审核信息',
+    dataIndex: 'reviewMessage',
   },
   {
     title: '创建时间',
