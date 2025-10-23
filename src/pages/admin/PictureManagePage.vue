@@ -21,6 +21,15 @@
           style="min-width: 180px"
         />
       </a-form-item>
+      <a-form-item label="审核状态" name="reviewStatus">
+        <a-select
+          v-model:value="searchParams.reviewStatus"
+          :options="PIC_REVIEW_STATUS_OPTIONS"
+          allow-clear
+          placeholder="请选择审核状态"
+          style="min-width: 180px"
+        />
+      </a-form-item>
       <a-form-item>
         <a-button html-type="submit" type="primary">搜索</a-button>
       </a-form-item>
@@ -94,10 +103,18 @@
 </template>
 <script lang="ts" setup>
 import { computed, onMounted, reactive, ref } from 'vue'
-import { deletePictureUsingPost, listPictureByPageUsingPost } from '@/api/pictureController.ts'
+import {
+  deletePictureUsingPost,
+  doPictureReviewUsingPost,
+  listPictureByPageUsingPost,
+} from '@/api/pictureController.ts'
 import { message } from 'ant-design-vue'
 import dayjs from 'dayjs'
-import { PIC_REVIEW_STATUS_ENUM, PIC_REVIEW_STATUS_MAP } from '../../constants/picture.ts'
+import {
+  PIC_REVIEW_STATUS_ENUM,
+  PIC_REVIEW_STATUS_MAP,
+  PIC_REVIEW_STATUS_OPTIONS,
+} from '../../constants/picture.ts'
 
 const columns = [
   {
@@ -206,6 +223,24 @@ const doSearch = () => {
   // 重置页码
   searchParams.current = 1
   fetchData()
+}
+
+// 审核图片
+const handleReview = async (record: API.Picture, reviewStatus: number) => {
+  const reviewMessage =
+    reviewStatus === PIC_REVIEW_STATUS_ENUM.PASS ? '管理员操作通过' : '管理员操作失败'
+  const res = await doPictureReviewUsingPost({
+    id: record.id,
+    reviewStatus,
+    reviewMessage,
+  })
+  if (res.data.code === 0) {
+    message.success('审核成功')
+    // 刷新数据
+    fetchData()
+  } else {
+    message.error('审核失败' + res.data.message)
+  }
 }
 
 // 删除数据
