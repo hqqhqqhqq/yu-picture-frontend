@@ -1,7 +1,17 @@
 <template>
   <div id="addPicturePage">
     <h2 style="margin-bottom: 16px">{{ route.query?.id ? '修改图片' : '创建图片' }}</h2>
-    <PictureUpload :onSuccess="onSuccess" :picture="picture" />
+    <a-tabs v-model:activeKey="uploadType">
+      <a-tab-pane key="file" tab="文件上传">
+        <!--图片上传组件-->
+        <PictureUpload :onSuccess="onSuccess" :picture="picture" />
+      </a-tab-pane>
+      <a-tab-pane key="url" tab="URL 上传">
+        <!--URL图片上传组件-->
+        <UrlPictureUpload :onSuccess="onSuccess" :picture="picture" />
+      </a-tab-pane>
+    </a-tabs>
+
     <a-form v-if="picture" :model="pictureForm" layout="vertical" @finish="handleSubmit">
       <a-form-item label="名称" name="name">
         <a-input v-model:value="pictureForm.name" placeholder="请输入名称" />
@@ -49,9 +59,11 @@ import {
   getPictureVoByIdUsingGet,
   listPictureTagCategoryUsingGet,
 } from '@/api/pictureController.ts'
+import UrlPictureUpload from '@/components/UrlPictureUpload.vue'
 
 const picture = ref<API.PictureVO>()
 const pictureForm = reactive<API.PictureEditRequest>({})
+const uploadType = ref<'file' | 'url'>('file')
 
 const onSuccess = (newPicture: API.PictureVO) => {
   picture.value = newPicture
