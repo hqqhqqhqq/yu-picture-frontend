@@ -18,7 +18,7 @@
       </a-form-item>
       <a-form-item>
         <a-button :loading="loading" html-type="submit" style="width: 100%" type="primary">
-          创建
+          提交
         </a-button>
       </a-form-item>
     </a-form>
@@ -40,12 +40,17 @@
 import { onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
-import { addSpaceUsingPost, getSpaceVoByIdUsingGet, listSpaceLevelUsingGet } from '@/api/spaceController.ts'
+import {
+  addSpaceUsingPost,
+  getSpaceVoByIdUsingGet,
+  listSpaceLevelUsingGet,
+  updateSpaceUsingPost
+} from '@/api/spaceController.ts'
 import { SPACE_LEVEL_OPTIONS } from '@/constants/space.ts'
 import { formatSize } from '../utils'
 
 const space = ref<API.SpaceVO>()
-const spaceForm = reactive<API.SpaceAddRequest>({})
+const spaceForm = reactive<API.SpaceAddRequest | API.SpaceEditRequest>({})
 const loading = ref(false)
 const spaceLevelList = ref<API.SpaceLevel[]>([])
 
@@ -76,10 +81,9 @@ const getOldSpace = async () => {
     if (res.data.code === 0 && res.data.data) {
       const data = res.data.data
       space.value = data
-      spaceForm.name = data.name
-      spaceForm.introduction = data.introduction
-      spaceForm.category = data.category
-      spaceForm.tags = data.tags
+      // 填充表单
+      spaceForm.spaceName = data.spaceName
+      spaceForm.spaceLevel = data.spaceLevel
     }
   }
 }
@@ -93,18 +97,30 @@ onMounted(() => {
  * @param values
  */
 const handleSubmit = async (values: any) => {
+  const spaceId = space.value?.id
   loading.value = true
-  const res = await addSpaceUsingPost({
-    ...spaceForm,
-  })
+  let res
+  if (spaceId) {
+    // 更新
+    res = await updateSpaceUsingPost({
+      id: spaceId,
+      ...spaceForm
+    })
+  } else {
+    // 创建
+    res = await addSpaceUsingPost({
+      ...spaceForm
+    })
+  }
+  // 操作成功
   if (res.data.code === 0 && res.data.data) {
-    message.success('创建成功')
+    message.success('操作成功')
     // 跳转到空间详情页
     router.push({
       path: `/space/${res.data.data}`,
     })
   } else {
-    message.error('创建失败，' + res.data.message)
+    message.error('操作失败，' + res.data.message)
   }
   loading.value = false
 }
