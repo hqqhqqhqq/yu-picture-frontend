@@ -1,6 +1,11 @@
 <template>
   <div id="globalSider">
-    <a-layout-sider v-if="loginUserStore.loginUser.id" width="200">
+    <a-layout-sider
+      v-if="loginUserStore.loginUser.id"
+      breakpoint="lg"
+      collapsed-width="0"
+      width="200"
+    >
       <a-menu
         v-model:selectedKeys="current"
         :items="menuItems"
@@ -13,10 +18,8 @@
 <script lang="ts" setup>
 import { h, ref } from 'vue'
 import { PictureOutlined, UserOutlined } from '@ant-design/icons-vue'
-import { message } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
 import { useLoginUserStore } from '../stores/useLoginUserStore.ts'
-import { userLogoutUsingPost } from '@/api/userController.ts'
 
 const loginUserStore = useLoginUserStore()
 
@@ -28,7 +31,7 @@ const menuItems = [
     label: '公共图库',
   },
   {
-    key: '/admin/my_space',
+    key: '/my_space',
     label: '我的空间',
     icon: () => h(UserOutlined),
   },
