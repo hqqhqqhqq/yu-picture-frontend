@@ -20,7 +20,7 @@
     </a-flex>
     <div style="margin-bottom: 16px" />
     <!-- 图片列表 -->
-    <PictureList :dataList="dataList" :loading="loading" />
+    <PictureList :dataList="dataList" :loading="loading" :showOp="true" :onReload="fetchData" />
     <!--  分页  -->
     <a-pagination
       v-model:current="searchParams.current"
@@ -81,7 +81,7 @@ const searchParams = reactive<API.PictureQueryRequest>({
   sortOrder: 'descend',
 })
 
-// 获取数据
+ // 获取数据
 const fetchData = async () => {
   loading.value = true
   // 转换搜索参数
