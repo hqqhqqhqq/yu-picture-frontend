@@ -41,7 +41,7 @@ import { useRouter } from 'vue-router'
 
 interface Props {
   dataList?: API.PictureVO[]
-  loading?: boolean
+  loading?: boolean,
 }
 
 const props = withDefaults(defineProps<Props>(), {

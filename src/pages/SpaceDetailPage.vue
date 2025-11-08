@@ -1,7 +1,7 @@
 <template>
   <div id="spaceDetailPage">
     <!--  空间信息  -->
-    <a-flex>
+    <a-flex justify="space-between">
       <h2>{{ space.spaceName }}（私有空间）</h2>
       <a-space size="middle">
         <a-button :href="`/add_picture?spaceId=${id}`" target="_blank" type="primary"
@@ -18,6 +18,18 @@
         </a-tooltip>
       </a-space>
     </a-flex>
+    <div style="margin-bottom: 16px" />
+    <!-- 图片列表 -->
+    <PictureList :dataList="dataList" :loading="loading" />
+    <!--  分页  -->
+    <a-pagination
+      v-model:current="searchParams.current"
+      v-model:pageSize="searchParams.pageSize"
+      :show-size-changer="false"
+      :total="total"
+      style="text-align: right"
+      @change="onPageChange"
+    />
   </div>
 </template>
 
@@ -27,6 +39,7 @@ import { getSpaceVoByIdUsingGet } from '@/api/spaceController.ts'
 import { message } from 'ant-design-vue'
 import { listPictureVoByPageUsingPost } from '@/api/pictureController.ts'
 import { formatSize } from '@/utils'
+import PictureList from '@/components/PictureList.vue'
 
 interface Props {
   id: string | number
@@ -56,7 +69,7 @@ onMounted(() => {
 })
 
 // ---------- 获取图片详情 ----------
-const dataList = ref<API.SpaceVO>([])
+const dataList = ref<API.PictureVO[]>([])
 const total = ref(0)
 const loading = ref(true)
 
@@ -68,13 +81,6 @@ const searchParams = reactive<API.PictureQueryRequest>({
   sortOrder: 'descend',
 })
 
-// 分页参数
-const onPageChange = (page: number, pageSize: number) => {
-  searchParams.current = page
-  searchParams.pageSize = pageSize
-  fetchData()
-}
-
 // 获取数据
 const fetchData = async () => {
   loading.value = true
@@ -84,7 +90,7 @@ const fetchData = async () => {
     ...searchParams,
   }
   const res = await listPictureVoByPageUsingPost(params)
-  if (res.data.data) {
+  if (res.data.code === 0 && res.data.data) {
     dataList.value = res.data.data.records ?? []
     total.value = res.data.data.total ?? 0
   } else {
@@ -97,6 +103,13 @@ const fetchData = async () => {
 onMounted(() => {
   fetchData()
 })
+
+// 分页参数
+const onPageChange = (page: number, pageSize: number) => {
+  searchParams.current = page
+  searchParams.pageSize = pageSize
+  fetchData()
+}
 </script>
 
 <style scoped>

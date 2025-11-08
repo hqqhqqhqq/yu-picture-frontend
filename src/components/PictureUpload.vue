@@ -1,10 +1,10 @@
 <template>
   <div class="picture-upload">
     <a-upload
-      list-type="picture-card"
-      :show-upload-list="false"
-      :custom-request="handleUpload"
       :before-upload="beforeUpload"
+      :custom-request="handleUpload"
+      :show-upload-list="false"
+      list-type="picture-card"
     >
       <img v-if="picture?.url" :src="picture?.url" alt="avatar" />
       <div v-else>
@@ -14,17 +14,17 @@
       </div>
     </a-upload>
   </div>
-
 </template>
 <script lang="ts" setup>
-import { ref } from 'vue';
-import { PlusOutlined, LoadingOutlined } from '@ant-design/icons-vue';
-import { message } from 'ant-design-vue';
-import type { UploadChangeParam, UploadProps } from 'ant-design-vue';
+import { ref } from 'vue'
+import { LoadingOutlined, PlusOutlined } from '@ant-design/icons-vue'
+import type { UploadProps } from 'ant-design-vue'
+import { message } from 'ant-design-vue'
 import { uploadPictureUsingPost } from '@/api/pictureController.ts'
 
 interface Props {
   picture?: API.PictureVO
+  spaceId?: number
   onSuccess?: (newPicture: API.PictureVO) => void
 }
 
@@ -42,7 +42,6 @@ const beforeUpload = (file: UploadProps['fileList'][number]) => {
   return isJpgOrPng && isLt2M
 }
 
-
 const loading = ref<boolean>(false)
 
 /**
@@ -52,7 +51,8 @@ const loading = ref<boolean>(false)
 const handleUpload = async ({ file }: any) => {
   loading.value = true
   try {
-    const params = props.picture ? { id: props.picture.id } : {};
+    const params: API.PictureUploadRequest = props.picture ? { id: props.picture.id } : {}
+    params.spaceId = props.spaceId
     const res = await uploadPictureUsingPost(params, {}, file)
     if (res.data.code === 0 && res.data.data) {
       message.success('图片上传成功')
@@ -67,8 +67,6 @@ const handleUpload = async ({ file }: any) => {
     loading.value = false
   }
 }
-
-
 </script>
 <style scoped>
 .picture-upload :deep(.ant-upload) {
@@ -92,5 +90,4 @@ const handleUpload = async ({ file }: any) => {
   margin-top: 8px;
   color: #666;
 }
-
 </style>

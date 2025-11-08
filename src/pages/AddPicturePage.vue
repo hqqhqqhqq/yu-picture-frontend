@@ -1,14 +1,17 @@
 <template>
   <div id="addPicturePage">
     <h2 style="margin-bottom: 16px">{{ route.query?.id ? '修改图片' : '创建图片' }}</h2>
+    <a-typography-paragraph v-if="spaceId" type="secondary">
+      保存至空间：<a :href="`/space/${spaceId}`" target="_blank">{{ spaceId }}</a>
+    </a-typography-paragraph>
     <a-tabs v-model:activeKey="uploadType">
       <a-tab-pane key="file" tab="文件上传">
         <!--图片上传组件-->
-        <PictureUpload :onSuccess="onSuccess" :picture="picture" />
+        <PictureUpload :onSuccess="onSuccess" :spaceId="spaceId" :picture="picture" />
       </a-tab-pane>
       <a-tab-pane key="url" tab="URL 上传">
         <!--URL图片上传组件-->
-        <UrlPictureUpload :onSuccess="onSuccess" :picture="picture" />
+        <UrlPictureUpload :onSuccess="onSuccess" :spaceId="spaceId" :picture="picture" />
       </a-tab-pane>
     </a-tabs>
 
@@ -51,7 +54,7 @@
 
 <script lang="ts" setup>
 import PictureUpload from '@/components/PictureUpload.vue'
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import {
@@ -61,18 +64,22 @@ import {
 } from '@/api/pictureController.ts'
 import UrlPictureUpload from '@/components/UrlPictureUpload.vue'
 
+const router = useRouter()
+const route = useRoute()
+
 const picture = ref<API.PictureVO>()
 const pictureForm = reactive<API.PictureEditRequest>({})
 const uploadType = ref<'file' | 'url'>('file')
+
+// 空间id 使用计算属性确保spaceId变化时重新获取
+const spaceId = computed(() => {
+  return route.query?.spaceId
+})
 
 const onSuccess = (newPicture: API.PictureVO) => {
   picture.value = newPicture
   pictureForm.name = newPicture.name
 }
-
-const router = useRouter()
-
-const route = useRoute()
 
 const getOldPicture = async () => {
   // 获取id
@@ -101,6 +108,7 @@ const handleSubmit = async (values: any) => {
   }
   const res = await editPictureUsingPost({
     id: pictureId,
+    spaceId: spaceId.value,
     ...values,
   })
   if (res.data.code === 0 && res.data.data) {
