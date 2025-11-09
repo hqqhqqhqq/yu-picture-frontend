@@ -31,10 +31,16 @@
             </a-card-meta>
             <template v-if="showOp" #actions>
               <a-space>
-                <EditOutlined @click="(e) => doEdit(picture, e)" />
+                <div @click="(e) => doEdit(picture, e)">
+                  <EditOutlined />
+                  编辑
+                </div>
               </a-space>
               <a-space>
-                <DeleteOutlined @click="(e) => doDelete(picture, e)" />
+                <div @click="(e) => doDelete(picture, e)">
+                  <DeleteOutlined />
+                  删除
+                </div>
               </a-space>
             </template>
           </a-card>
