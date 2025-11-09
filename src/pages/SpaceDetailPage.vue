@@ -19,8 +19,11 @@
       </a-space>
     </a-flex>
     <div style="margin-bottom: 16px" />
+    <!--  搜素表单  -->
+    <PictureSearchForm :onSearch="onSearch" />
+    <div style="margin-bottom: 16px" />
     <!-- 图片列表 -->
-    <PictureList :dataList="dataList" :loading="loading" :showOp="true" :onReload="fetchData" />
+    <PictureList :dataList="dataList" :loading="loading" :onReload="fetchData" :showOp="true" />
     <!--  分页  -->
     <a-pagination
       v-model:current="searchParams.current"
@@ -40,6 +43,7 @@ import { message } from 'ant-design-vue'
 import { listPictureVoByPageUsingPost } from '@/api/pictureController.ts'
 import { formatSize } from '@/utils'
 import PictureList from '@/components/PictureList.vue'
+import PictureSearchForm from '@/components/PictureSearchForm.vue'
 
 interface Props {
   id: string | number
@@ -74,20 +78,20 @@ const total = ref(0)
 const loading = ref(true)
 
 // 搜索条件
-const searchParams = reactive<API.PictureQueryRequest>({
+const searchParams = ref<API.PictureQueryRequest>({
   current: 1,
   pageSize: 12,
   sortField: 'createTime',
   sortOrder: 'descend',
 })
 
- // 获取数据
+// 获取数据
 const fetchData = async () => {
   loading.value = true
   // 转换搜索参数
   const params = {
     spaceId: props.id,
-    ...searchParams,
+    ...searchParams.value,
   }
   const res = await listPictureVoByPageUsingPost(params)
   if (res.data.code === 0 && res.data.data) {
@@ -99,6 +103,19 @@ const fetchData = async () => {
   loading.value = false
 }
 
+// 搜索
+const onSearch = (newSearchParams: API.PictureQueryRequest) => {
+  console.log('new', newSearchParams)
+
+  searchParams.value = {
+    ...searchParams.value,
+    ...newSearchParams,
+    current: 1,
+  }
+  console.log('searchparams', searchParams.value)
+  fetchData()
+}
+
 // 页面加载时请求一次
 onMounted(() => {
   fetchData()
@@ -106,8 +123,8 @@ onMounted(() => {
 
 // 分页参数
 const onPageChange = (page: number, pageSize: number) => {
-  searchParams.current = page
-  searchParams.pageSize = pageSize
+  searchParams.value.current = page
+  searchParams.value.pageSize = pageSize
   fetchData()
 }
 </script>
