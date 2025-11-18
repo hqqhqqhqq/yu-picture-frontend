@@ -7,14 +7,25 @@
     <a-tabs v-model:activeKey="uploadType">
       <a-tab-pane key="file" tab="文件上传">
         <!--图片上传组件-->
-        <PictureUpload :onSuccess="onSuccess" :spaceId="spaceId" :picture="picture" />
+        <PictureUpload :onSuccess="onSuccess" :picture="picture" :spaceId="spaceId" />
       </a-tab-pane>
       <a-tab-pane key="url" tab="URL 上传">
         <!--URL图片上传组件-->
-        <UrlPictureUpload :onSuccess="onSuccess" :spaceId="spaceId" :picture="picture" />
+        <UrlPictureUpload :onSuccess="onSuccess" :picture="picture" :spaceId="spaceId" />
       </a-tab-pane>
     </a-tabs>
-
+    <!-- 图片编辑 -->
+    <div v-if="picture" class="edit-bar">
+      <a-button :icon="h(EditOutlined)" @click="doEditPicture">编辑图片</a-button>
+      <ImageCropper
+        ref="imageCropperRef"
+        :imageUrl="picture?.url"
+        :onSuccess="onCropSuccess"
+        :picture="picture"
+        :spaceId="spaceId"
+      />
+    </div>
+    <!--  图片信息表单  -->
     <a-form v-if="picture" :model="pictureForm" layout="vertical" @finish="handleSubmit">
       <a-form-item label="名称" name="name">
         <a-input v-model:value="pictureForm.name" placeholder="请输入名称" />
@@ -54,7 +65,7 @@
 
 <script lang="ts" setup>
 import PictureUpload from '@/components/PictureUpload.vue'
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, h, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import {
@@ -63,6 +74,8 @@ import {
   listPictureTagCategoryUsingGet,
 } from '@/api/pictureController.ts'
 import UrlPictureUpload from '@/components/UrlPictureUpload.vue'
+import ImageCropper from '@/components/imageCropper.vue'
+import { EditOutlined } from '@ant-design/icons-vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -151,11 +164,30 @@ onMounted(() => {
   getTagCategoryOptions()
   getOldPicture()
 })
+
+// ----- 图片编辑器引用 ------
+const imageCropperRef = ref()
+
+// 编辑图片
+const doEditPicture = async () => {
+  imageCropperRef.value?.openModal()
+}
+
+// 编辑成功事件
+const onCropSuccess = (newPicture: API.PictureVO) => {
+  picture.value = newPicture
+}
+
 </script>
 
 <style scoped>
 #addPicturePage {
   max-width: 720px;
   margin: 0 auto;
+}
+
+#addPicturePage .edit-bar {
+  text-align: center;
+  margin: 16px 0;
 }
 </style>
