@@ -4,9 +4,8 @@
       <h2>空间管理</h2>
       <a-space>
         <a-button href="/add_space" target="_blank" type="primary">+ 创建图片</a-button>
-        <a-button ghost href="/add_space/batch" target="_blank" type="primary"
-          >+ 批量创建图片</a-button
-        >
+        <a-button ghost href="/space_analyze?queryPublic=1" target="_blank" type="primary">+ 分析公共图库</a-button>
+        <a-button ghost href="/space_analyze?queryAll=1" target="_blank" type="primary">+ 分析全部空间</a-button>
       </a-space>
     </a-flex>
     <div style="margin-bottom: 16px" />
@@ -60,6 +59,9 @@
         </template>
         <template v-else-if="column.key === 'action'">
           <a-space wrap>
+            <a-button :href="`/space_analyze?spaceId=${record.id}`" target="_blank" type="link">
+              分析
+            </a-button>
             <a-button :href="`/add_space?id=${record.id}`" target="_blank" type="link">
               编辑
             </a-button>
