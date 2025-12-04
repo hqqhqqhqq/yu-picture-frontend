@@ -2,10 +2,19 @@
   <div id="spaceDetailPage">
     <!--  空间信息  -->
     <a-flex justify="space-between">
-      <h2>{{ space.spaceName }}（私有空间）</h2>
+      <h2>{{ space.spaceName }}（{{ SPACE_TYPE_MAP[space.spaceType] }}）</h2>
       <a-space size="middle">
         <a-button :href="`/add_picture?spaceId=${id}`" target="_blank" type="primary"
           >+ 创建图片
+        </a-button>
+        <a-button
+          :href="`/spaceUserManage/${id}`"
+          :icon="h(TeamOutlined)"
+          ghost
+          target="_blank"
+          type="primary"
+        >
+          成员管理
         </a-button>
         <a-button
           :href="`/space_analyze?spaceId=${id}`"
@@ -56,7 +65,7 @@
 </template>
 
 <script lang="ts" setup>
-import { h, onMounted, ref } from 'vue'
+import { h, onMounted, ref, watch, watchEffect } from 'vue'
 import { getSpaceVoByIdUsingGet } from '@/api/spaceController.ts'
 import { message } from 'ant-design-vue'
 import {
@@ -69,7 +78,8 @@ import PictureSearchForm from '@/components/PictureSearchForm.vue'
 import { ColorPicker } from 'vue3-colorpicker'
 import 'vue3-colorpicker/style.css'
 import BatchEditPictureModal from '@/components/BatchEditPictureModal.vue'
-import { EditOutlined, BarChartOutlined } from '@ant-design/icons-vue'
+import { EditOutlined, BarChartOutlined, TeamOutlined } from '@ant-design/icons-vue'
+import { SPACE_TYPE_MAP } from '../constants/space.ts'
 
 interface Props {
   id: string | number
@@ -184,6 +194,13 @@ const doBatchEdit = () => {
     batchEditPictureModalRef.value.openModal()
   }
 }
+
+watch(
+  () => props.id,
+  (newSpaceId) => {
+  fetchSpaceDetail()
+  fetchData()
+})
 </script>
 
 <style scoped>
