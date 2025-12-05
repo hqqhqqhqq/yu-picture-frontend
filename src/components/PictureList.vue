@@ -30,30 +30,10 @@
               </template>
             </a-card-meta>
             <template v-if="showOp" #actions>
-              <a-space>
-                <div @click="(e) => doShare(picture, e)">
-                  <ShareAltOutlined />
-                  分享
-                </div>
-              </a-space>
-              <a-space>
-                <div @click="(e) => doSearch(picture, e)">
-                  <SearchOutlined />
-                  搜索
-                </div>
-              </a-space>
-              <a-space>
-                <div @click="(e) => doEdit(picture, e)">
-                  <EditOutlined />
-                  编辑
-                </div>
-              </a-space>
-              <a-space>
-                <div @click="(e) => doDelete(picture, e)">
-                  <DeleteOutlined />
-                  删除
-                </div>
-              </a-space>
+              <ShareAltOutlined @click="(e) => doShare(picture, e)" />
+              <SearchOutlined @click="(e) => doSearch(picture, e)" />
+              <EditOutlined v-if="canEdit" @click="(e) => doEdit(picture, e)" />
+              <DeleteOutlined v-if="canDelete" @click="(e) => doDelete(picture, e)" />
             </template>
           </a-card>
         </a-list-item>
@@ -80,6 +60,8 @@ interface Props {
   dataList?: API.PictureVO[]
   loading?: boolean
   showOp?: boolean
+  canEdit?: boolean
+  canDelete?: boolean
   onReload?: () => void
 }
 
@@ -87,6 +69,8 @@ const props = withDefaults(defineProps<Props>(), {
   dataList: () => [],
   loading: false,
   showOp: false,
+  canEdit: false,
+  canDelete: false
 })
 
 const router = useRouter()
